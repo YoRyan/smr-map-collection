@@ -86,6 +86,13 @@ let private readMapPreview (archive: IArchive) =
 
 let private tryParseDateTime (s: string) = DateTime.TryParse s |> tryGetByref
 
+let private tryParseType (s: string) =
+    let s = s.ToLowerInvariant()
+
+    if s.Contains "single" then Some "single"
+    elif s.Contains "multi" then Some "multi"
+    else None
+
 let private readMapArchive (stream: Stream) (fallbackName: string) =
     result {
         use archive = SevenZipArchive.OpenArchive stream
@@ -99,7 +106,7 @@ let private readMapArchive (stream: Stream) (fallbackName: string) =
               DateUpdated = tryGetValue fields [ "date"; "updated" ] |> Option.bind tryParseDateTime
               Author = tryGetValue fields [ "author" ]
               ModifiedBy = tryGetValue fields [ "modified"; "by" ]
-              Type = tryGetValue fields [ "type" ]
+              Type = tryGetValue fields [ "type" ] |> Option.bind tryParseType
               Description = description
               PreviewJpeg = preview }
     }
