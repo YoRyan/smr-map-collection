@@ -1,0 +1,8 @@
+source https://api.nuget.org/v3/index.json
+
+storage: none
+
+nuget FSharp.Core
+nuget FsToolkit.ErrorHandling ~> 5
+nuget SharpCompress
+nuget System.CommandLine ~> 2
