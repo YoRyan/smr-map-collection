@@ -86,20 +86,14 @@ let private readMapPreview (archive: IArchive) =
 
 let private tryParseDateTime (s: string) = DateTime.TryParse s |> tryGetByref
 
-let private readMapArchive (stream: Stream) =
+let private readMapArchive (stream: Stream) (fallbackName: string) =
     result {
         use archive = SevenZipArchive.OpenArchive stream
         let! fields, description = readMapInfo archive
         let preview = readMapPreview archive
 
-        let! name =
-            tryGetValue fields [ "map"; "name" ]
-            |> function
-                | Some s -> Ok s
-                | None -> Error "This mapInfo.txt does not define a map name"
-
         return
-            { MapName = name
+            { MapName = tryGetValue fields [ "map"; "name" ] |> Option.defaultValue fallbackName
               MapVersion = tryGetValue fields [ "map"; "version" ]
               DateCreated = tryGetValue fields [ "date"; "created" ] |> Option.bind tryParseDateTime
               DateUpdated = tryGetValue fields [ "date"; "updated" ] |> Option.bind tryParseDateTime
@@ -121,7 +115,7 @@ let private readZipDownloadOfMaps (stream: Stream) =
         use ms = new MemoryStream()
         stream.CopyTo ms
 
-        match readMapArchive ms with
+        match readMapArchive ms e.Key with
         | Ok map -> Some map
         | Error err ->
             printfn "Error processing %s: %s" e.Key err
