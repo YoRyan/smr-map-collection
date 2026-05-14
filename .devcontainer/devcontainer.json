@@ -7,9 +7,12 @@
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	"features": {
+		"ghcr.io/devcontainers-extra/features/apt-packages:1": {
+			"packages": "imagemagick"
+		},
 		"ghcr.io/devcontainers/features/dotnet:2": {
 			"version": "lts"
-		}
+		},
 	},
 
 	// Configure tool-specific properties.
