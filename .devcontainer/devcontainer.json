@@ -3,10 +3,14 @@
 {
 	"name": "F# (.NET)",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "mcr.microsoft.com/devcontainers/dotnet:2-10.0-noble",
+	"image": "mcr.microsoft.com/devcontainers/ruby:3.4-trixie",
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
-	// "features": {},
+	"features": {
+		"ghcr.io/devcontainers/features/dotnet:2": {
+			"version": "lts"
+		}
+	},
 
 	// Configure tool-specific properties.
 	"customizations": {
