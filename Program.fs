@@ -1,16 +1,15 @@
 ﻿open System
 open System.Collections.Generic
-open System.Globalization
 open System.IO
+open System.Text.Json
 open System.Text.RegularExpressions
 
-open CsvHelper
 open FsToolkit.ErrorHandling
 open SharpCompress.Archives
 open SharpCompress.Archives.Zip
 open SharpCompress.Archives.SevenZip
 
-type CsvRecord =
+type MapJson =
     { pid: string
       label: string
       version: string option
@@ -22,7 +21,7 @@ type CsvRecord =
       description: string }
 
 type private Map =
-    { Record: CsvRecord
+    { Json: MapJson
       PreviewJpeg: byte array option }
 
 let private split2 (sep: string) (s: string) =
@@ -102,7 +101,7 @@ let private readMapArchive (stream: Stream) (fileName: string) =
         let! fields, description = readMapInfo archive
 
         return
-            { Record =
+            { Json =
                 { pid = fileName
                   label = tryGetValue fields [ "map"; "name" ] |> Option.defaultValue fileName
                   version = tryGetValue fields [ "map"; "version" ]
@@ -138,24 +137,22 @@ let private doProcessZip (zipPath: FileInfo) (outPath: DirectoryInfo) =
     let rawImages = Path.Combine(string outPath, "raw_images")
     Directory.CreateDirectory rawImages |> ignore
 
-    use csvStream = File.Open(Path.Combine(string outPath, "smr.csv"), FileMode.Create)
-    use outWriter = new StreamWriter(csvStream)
-    use csv = new CsvWriter(outWriter, CultureInfo.InvariantCulture)
-
-    csv.WriteHeader<CsvRecord>()
-    csv.NextRecord()
+    let mutable json = []
 
     for map in readZipDownloadOfMaps inStream do
-        csv.WriteRecord map.Record
-        csv.NextRecord()
-
         match map.PreviewJpeg with
         | Some bytes ->
-            let imagePath = Path.Combine(rawImages, $"{map.Record.pid}.jpeg")
+            let imagePath = Path.Combine(rawImages, $"{map.Json.pid}.jpeg")
             File.WriteAllBytes(imagePath, bytes)
         | None -> ()
 
-    csv.Flush()
+        json <- map.Json :: json
+
+    use jsonStream =
+        File.Open(Path.Combine(string outPath, "smr.json"), FileMode.Create)
+
+    json <- List.rev json
+    JsonSerializer.Serialize(jsonStream, json)
 
 [<EntryPoint>]
 let main argv =
