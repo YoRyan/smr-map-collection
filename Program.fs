@@ -93,8 +93,8 @@ let private readMapPreview (archive: IArchive) =
 let private tryParseType (s: string) =
     let s = s.ToLowerInvariant()
 
-    if s.Contains "single" then Some "Single-Player"
-    elif s.Contains "multi" then Some "Multiplayer"
+    if s.Contains "single" then Some "singleplayer"
+    elif s.Contains "multi" then Some "multiplayer"
     else None
 
 let private readMapArchive (stream: Stream) (fileName: string) =
