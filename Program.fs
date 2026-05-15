@@ -1,23 +1,28 @@
 ﻿open System
 open System.Collections.Generic
+open System.Globalization
 open System.IO
-open System.Text.Json
 open System.Text.RegularExpressions
 
+open CsvHelper
 open FsToolkit.ErrorHandling
 open SharpCompress.Archives
 open SharpCompress.Archives.Zip
 open SharpCompress.Archives.SevenZip
 
-type Map =
-    { MapName: string
-      MapVersion: string option
-      DateCreated: DateTime option
-      DateUpdated: DateTime option
-      Author: string option
-      ModifiedBy: string option
-      Type: string option
-      Description: string
+type CsvRecord =
+    { pid: string
+      label: string
+      version: string option
+      created: string option
+      updated: string option
+      author: string option
+      modified_by: string option
+      ``type``: string option
+      description: string }
+
+type private Map =
+    { Record: CsvRecord
       PreviewJpeg: byte array option }
 
 let private split2 (sep: string) (s: string) =
@@ -84,8 +89,6 @@ let private readMapPreview (archive: IArchive) =
         return ms.ToArray()
     }
 
-let private tryParseDateTime (s: string) = DateTime.TryParse s |> tryGetByref
-
 let private tryParseType (s: string) =
     let s = s.ToLowerInvariant()
 
@@ -93,22 +96,23 @@ let private tryParseType (s: string) =
     elif s.Contains "multi" then Some "multi"
     else None
 
-let private readMapArchive (stream: Stream) (fallbackName: string) =
+let private readMapArchive (stream: Stream) (fileName: string) =
     result {
         use archive = SevenZipArchive.OpenArchive stream
         let! fields, description = readMapInfo archive
-        let preview = readMapPreview archive
 
         return
-            { MapName = tryGetValue fields [ "map"; "name" ] |> Option.defaultValue fallbackName
-              MapVersion = tryGetValue fields [ "map"; "version" ]
-              DateCreated = tryGetValue fields [ "date"; "created" ] |> Option.bind tryParseDateTime
-              DateUpdated = tryGetValue fields [ "date"; "updated" ] |> Option.bind tryParseDateTime
-              Author = tryGetValue fields [ "author" ]
-              ModifiedBy = tryGetValue fields [ "modified"; "by" ]
-              Type = tryGetValue fields [ "type" ] |> Option.bind tryParseType
-              Description = description
-              PreviewJpeg = preview }
+            { Record =
+                { pid = fileName
+                  label = tryGetValue fields [ "map"; "name" ] |> Option.defaultValue fileName
+                  version = tryGetValue fields [ "map"; "version" ]
+                  created = tryGetValue fields [ "date"; "created" ]
+                  updated = tryGetValue fields [ "date"; "updated" ]
+                  author = tryGetValue fields [ "author" ]
+                  modified_by = tryGetValue fields [ "modified"; "by" ]
+                  ``type`` = tryGetValue fields [ "type" ] |> Option.bind tryParseType
+                  description = description }
+              PreviewJpeg = readMapPreview archive }
     }
 
 let private readZipDownloadOfMaps (stream: Stream) =
@@ -128,16 +132,40 @@ let private readZipDownloadOfMaps (stream: Stream) =
             printfn "Error processing %s: %s" e.Key err
             None)
 
-let private doReadZip (zipPath: FileInfo) (jsonPath: FileInfo) =
+let private doProcessZip (zipPath: FileInfo) (outPath: DirectoryInfo) =
     use inStream = zipPath.OpenRead()
-    let maps = readZipDownloadOfMaps inStream
-    use outStream = jsonPath.OpenWrite()
-    JsonSerializer.Serialize(outStream, maps)
+
+    let rawImages = Path.Combine(string outPath, "raw_images")
+    Directory.CreateDirectory rawImages |> ignore
+
+    use csvStream = File.Open(Path.Combine(string outPath, "smr.csv"), FileMode.Create)
+    use outWriter = new StreamWriter(csvStream)
+    use csv = new CsvWriter(outWriter, CultureInfo.InvariantCulture)
+
+    csv.WriteHeader<CsvRecord>()
+    csv.NextRecord()
+
+    for map in readZipDownloadOfMaps inStream do
+        csv.WriteRecord map.Record
+        csv.NextRecord()
+
+        match map.PreviewJpeg with
+        | Some bytes ->
+            let imagePath = Path.Combine(rawImages, $"{map.Record.pid}.jpeg")
+            File.WriteAllBytes(imagePath, bytes)
+        | None -> ()
+
+    csv.Flush()
 
 [<EntryPoint>]
 let main argv =
     let root =
-        CommandLine.RootCommand "Generate JSON metadata for the Sid Meier's Railroads Custom Maps Collection."
+        CommandLine.RootCommand "Generate Wax metadata for the Sid Meier's Railroads Custom Maps Collection."
+
+    let outPath = new CommandLine.Option<DirectoryInfo>("--outPath", "-o")
+    outPath.Description <- "Directory path to write Wax metadata to."
+    outPath.Required <- true
+    root.Options.Add outPath
 
     let readZip =
         CommandLine.Command(
@@ -148,14 +176,11 @@ let main argv =
     let readZipIn = new CommandLine.Argument<FileInfo> "zipPath"
     readZipIn.Description <- "Path to the downloaded Zip file."
     readZip.Add readZipIn
-    let readZipOut = new CommandLine.Argument<FileInfo> "jsonPath"
-    readZipOut.Description <- "Path to write the JSON metadata to."
-    readZip.Add readZipOut
 
     readZip.SetAction(fun result ->
         let zipPath = result.GetRequiredValue readZipIn
-        let jsonPath = result.GetRequiredValue readZipOut
-        doReadZip zipPath jsonPath)
+        let outPath = result.GetRequiredValue outPath
+        doProcessZip zipPath outPath)
 
     root.Subcommands.Add readZip
 

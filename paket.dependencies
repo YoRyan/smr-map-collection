@@ -2,6 +2,7 @@ source https://api.nuget.org/v3/index.json
 
 storage: none
 
+nuget CsvHelper ~> 33
 nuget FSharp.Core
 nuget FsToolkit.ErrorHandling ~> 5
 nuget SharpCompress

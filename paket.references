@@ -2,3 +2,4 @@ SharpCompress
 FSharp.Core
 FsToolkit.ErrorHandling
 System.CommandLine
+CsvHelper
