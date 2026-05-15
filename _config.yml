@@ -96,7 +96,6 @@ search:
           - updated
           - author
           - modified_by
-          - type
           - description
 
 # --------------------------------------------------------------
