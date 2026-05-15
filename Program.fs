@@ -134,7 +134,7 @@ let private readZipDownloadOfMaps (stream: Stream) =
 let private doProcessZip (zipPath: FileInfo) (outPath: DirectoryInfo) =
     use inStream = zipPath.OpenRead()
 
-    let rawImages = Path.Combine(string outPath, "raw_images")
+    let rawImages = Path.Combine(string outPath, "raw_images", "smr")
     Directory.CreateDirectory rawImages |> ignore
 
     let mutable json = []
