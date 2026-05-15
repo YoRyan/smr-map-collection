@@ -12,7 +12,7 @@ Be sure to also check out the official [game manual](https://archive.org/details
 {% include search_box.html search='main' %}
 
 #### Single-Player
-{% include collection_gallery.html facet_by='type' only='Single-Player' collection='smr' %}
+{% include collection_gallery.html facet_by='type' only='singleplayer' collection='smr' %}
 
 #### Multiplayer
-{% include collection_gallery.html facet_by='type' only='Multiplayer' collection='smr' %}
+{% include collection_gallery.html facet_by='type' only='multiplayer' collection='smr' %}
