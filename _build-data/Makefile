@@ -1,3 +1,5 @@
+all: _data/smr.csv
+
 _data/smr.csv: smr-map-collection archive.zip
 	mkdir -p _data
 	./smr-map-collection --outPath _data read-zip archive.zip
