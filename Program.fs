@@ -11,6 +11,7 @@ open SharpCompress.Archives.SevenZip
 
 type MapJson =
     { pid: string
+      filename: string
       label: string
       version: string option
       created: string option
@@ -101,9 +102,17 @@ let private readMapArchive (stream: Stream) (fileName: string) =
         use archive = SevenZipArchive.OpenArchive stream
         let! fields, description = readMapInfo archive
 
+        // We need to massage the pid so that it works with all parts of Wax.
+        let pid =
+            fileName
+            |> fun s -> Path.ChangeExtension(s, null)
+            |> fun s -> Regex.Replace(s, @"[\.'""]", "")
+            |> _.ToLowerInvariant()
+
         return
             { Json =
-                { pid = fileName
+                { pid = pid
+                  filename = fileName
                   label = tryGetValue fields [ "map"; "name" ] |> Option.defaultValue fileName
                   version = tryGetValue fields [ "map"; "version" ]
                   created = tryGetValue fields [ "date"; "created" ]
