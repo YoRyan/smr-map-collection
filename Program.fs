@@ -18,7 +18,8 @@ type MapJson =
       author: string option
       modified_by: string option
       ``type``: string option
-      description: string }
+      description: string
+      download_url: string }
 
 type private Map =
     { Json: MapJson
@@ -110,7 +111,8 @@ let private readMapArchive (stream: Stream) (fileName: string) =
                   author = tryGetValue fields [ "author" ]
                   modified_by = tryGetValue fields [ "modified"; "by" ]
                   ``type`` = tryGetValue fields [ "type" ] |> Option.bind tryParseType
-                  description = description }
+                  description = description
+                  download_url = $"https://archive.org/download/sid-meiers-railroads-custom-maps-collection/{fileName}" }
               PreviewJpeg = readMapPreview archive }
     }
 
