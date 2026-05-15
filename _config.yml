@@ -99,7 +99,7 @@ search:
 
 menu:
   - label: Browse by Author
-    link: /author/
+    link: /by_author/
 
 # --------------------------------------------------------------
 # SITE FOOTER SETTINGS

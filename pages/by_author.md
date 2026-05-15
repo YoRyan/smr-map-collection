@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Browse by Author
-permalink: /author/
+permalink: /by_author/
 ---
 
 #### Author
