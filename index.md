@@ -1,19 +1,18 @@
 ---
 layout: page
 show_title: false
-banner:
-  collection: qatar
-  pid: obj10
-  y: 25%
-  clickable: yes
-  height: '500px'
 ---
 
-__Wax__ is a [minimal computing](http://go-dh.github.io/mincomp/) project for producing digital exhibitions focused on longevity, low costs, and flexibility. Our underlying technology is made to learn and to teach, and can produce beautifully rendered, high-quality image collections and scholarly exhibits. To start using Wax, please see our [documentation](https://minicomp.github.io/wiki/#/wax/) for installation instructions and more.
+*Sid Meier's Railroads!* is a PC game that is approaching 20 years old, yet it retains an active modding community to this day. This website documents the custom maps that have been [uploaded](https://archive.org/details/sid-meiers-railroads-custom-maps-collection) to the Internet Archive and makes them available for easy browsing and downloading. The map data are pulled directly from the Internet Archive using an open-source [program](https://github.com/YoRyan/smr-map-collection) that I run periodically as more maps become available.
 
-The collection items in this demo are from The Museum of Islamic Art, Qatar, (courtesy of [WikiMedia](https://commons.wikimedia.org/wiki/Category:Google_Art_Project_works_in_The_Museum_of_Islamic_Art,_Qatar) and [Google Art Project](https://www.google.com/culturalinstitute/about/artproject/)) and The Qatar National Library (via [World Digital Library](https://www.wdl.org/en/)).
+Be sure to also check out the official [game manual](https://archive.org/details/sid-meiers-railroads-manual) and [strategy guide](https://archive.org/details/smr-strategy-guide), which are also available on the Internet Archive.
 
-### Browse the Collection
+### The Maps
 
-#### By Item Type
-{% include collection_gallery.html facet_by='object_type' collection='qatar' %}
+{% include search_box.html search='main' %}
+
+#### Single-Player
+{% include collection_gallery.html facet_by='type' only='Single-Player' collection='smr' %}
+
+#### Multiplayer
+{% include collection_gallery.html facet_by='type' only='Multiplayer' collection='smr' %}

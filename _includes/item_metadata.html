@@ -11,19 +11,24 @@
     Only display non-empty values
     {% endcomment %}
     {% if value | strip != '' %}
-      {% if item.type == 'link' %}
-        {% if key == 'manifest' %}
+      {% case item.type %}
+        {% when 'link' %}
+          {% if key == 'manifest' %}
+            {%- capture value -%}
+              <a href="{{ value | absolute_url }}" target="_blank" rel="noreferrer">{{ value | absolute_url }}</a>
+            {%- endcapture -%}
+          {% else %}
+            {%- capture value -%}
+              <a href="{{ value | absolute_url }}" target="_blank" rel="noreferrer">
+                {{ value | absolute_url | remove: 'https://' | remove: 'http://' | split: "/" | first }}
+              </a>
+            {%- endcapture -%}
+          {% endif %}
+        {% when 'multiline' %}
           {%- capture value -%}
-            <a href="{{ value | absolute_url }}" target="_blank" rel="noreferrer">{{ value | absolute_url }}</a>
+            {{ value | newline_to_br }}
           {%- endcapture -%}
-        {% else %}
-          {%- capture value -%}
-            <a href="{{ value | absolute_url }}" target="_blank" rel="noreferrer">
-              {{ value | absolute_url | remove: 'https://' | remove: 'http://' | split: "/" | first }}
-            </a>
-          {%- endcapture -%}
-        {% endif %}
-      {% endif %}
+      {% endcase %}
         <dt>{{ item.label }}</dt>
         <dd>{{ value | strip }}</dd>
     {% endif %}
