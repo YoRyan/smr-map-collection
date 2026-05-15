@@ -29,7 +29,7 @@ jobs:
         with:
           ref: wax-website-deploy
       - name: Setup Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -38,7 +38,7 @@ jobs:
       - name: Run Jekyll
         run: bundle exec jekyll build
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
 
   # Deployment job
   deploy:
