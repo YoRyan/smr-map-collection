@@ -11,8 +11,8 @@ Be sure to also check out the official [game manual](https://archive.org/details
 
 {% include search_box.html search='main' %}
 
-#### Single-Player
+#### Solo Play
 {% include collection_gallery.html facet_by='type' only='singleplayer' collection='map' %}
 
-#### Multiplayer
+#### With Competition
 {% include collection_gallery.html facet_by='type' only='multiplayer' collection='map' %}
