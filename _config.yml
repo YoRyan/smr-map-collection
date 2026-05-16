@@ -68,13 +68,13 @@ kramdown:
 collections:
   exhibits:
     output: true
-  smr: # name of collection
+  map: # name of collection
     output: true # makes sure pages are output as html files
     layout: smr_map # the layout for the pages to use
     metadata:
-      source: smr.json # path to the metadata file within `_data`
+      source: map.json # path to the metadata file within `_data`
     images:
-      source: raw_images/smr # path to the directory of images within `_data`
+      source: raw_images/map # path to the directory of images within `_data`
 
 # --------------------------------------------------------------
 # SEARCH INDEX SETTINGS
@@ -88,7 +88,7 @@ search:
   main:
     index: '/search/index.json' # file the index will get written to
     collections:
-      smr:
+      map:
         content: false # whether or not to index page content
         fields: # the metadata fields to index
           - label
