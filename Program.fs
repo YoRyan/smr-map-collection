@@ -142,10 +142,10 @@ let private readZipDownloadOfMaps (stream: Stream) =
             printfn "Error processing %s: %s" e.Key err
             None)
 
-let private doProcessZip (zipPath: FileInfo) (outPath: DirectoryInfo) =
+let private doProcessZip (zipPath: FileInfo) (outPath: DirectoryInfo, collection: string) =
     use inStream = zipPath.OpenRead()
 
-    let rawImages = Path.Combine(string outPath, "raw_images", "smr")
+    let rawImages = Path.Combine(string outPath, "raw_images", collection)
     Directory.CreateDirectory rawImages |> ignore
 
     let mutable json = []
@@ -160,7 +160,7 @@ let private doProcessZip (zipPath: FileInfo) (outPath: DirectoryInfo) =
         json <- map.Json :: json
 
     use jsonStream =
-        File.Open(Path.Combine(string outPath, "smr.json"), FileMode.Create)
+        File.Open(Path.Combine(string outPath, $"{collection}.json"), FileMode.Create)
 
     json <- List.rev json
     JsonSerializer.Serialize(jsonStream, json)
@@ -175,6 +175,11 @@ let main argv =
     outPath.Required <- true
     root.Options.Add outPath
 
+    let collection = new CommandLine.Option<string>("--collection", "-c")
+    collection.Description <- "Collection name for the Wax metadata."
+    collection.Required <- true
+    root.Options.Add collection
+
     let readZip =
         CommandLine.Command(
             "read-zip",
@@ -188,7 +193,8 @@ let main argv =
     readZip.SetAction(fun result ->
         let zipPath = result.GetRequiredValue readZipIn
         let outPath = result.GetRequiredValue outPath
-        doProcessZip zipPath outPath)
+        let collection = result.GetRequiredValue collection
+        doProcessZip zipPath (outPath, collection))
 
     root.Subcommands.Add readZip
 

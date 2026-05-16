@@ -1,8 +1,8 @@
-all: _data/smr.json
+all: _data/map.json
 
-_data/smr.json: smr-map-collection archive.zip
+_data/map.json: smr-map-collection archive.zip
 	mkdir -p _data
-	./smr-map-collection --outPath _data read-zip archive.zip
+	./smr-map-collection --outPath _data --collection map read-zip archive.zip
 
 smr-map-collection:
 	dotnet publish ../smr-map-collection.fsproj --output .
